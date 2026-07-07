@@ -1,0 +1,15 @@
+.DS_Store
+olist.db
+
+ml_dataset.csv
+ml_dataset_v2.csv
+
+final_test_predictions.csv
+
+results_phase2a.csv
+results_phase2b.csv
+results_phase3.csv
+data/
+__pycache__/
+*.pyc
+venv/
