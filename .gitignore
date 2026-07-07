@@ -13,3 +13,7 @@ data/
 __pycache__/
 *.pyc
 venv/
+data/
+__pycache__/
+*.pyc
+venv/
