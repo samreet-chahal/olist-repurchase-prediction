@@ -27,6 +27,74 @@ Only **3.1%** of Olist customers ever place a second order. Two questions:
 | `07_tuning_error_analysis.py` | CV hyperparameter tuning, lift table, segment error analysis |
 | `08_recommender.py` | 3 recommenders evaluated leave-last-out with hit@10 |
 
+## Database schema
+
+Simplified ER diagram showing the main tables, join keys and the columns used in this project (the raw Olist tables contain additional columns).
+
+```mermaid
+erDiagram
+  CUSTOMERS ||--o{ ORDERS : places
+  ORDERS ||--|{ ORDER_ITEMS : contains
+  ORDERS ||--o{ ORDER_PAYMENTS : "paid via"
+  ORDERS ||--o{ ORDER_REVIEWS : receives
+  PRODUCTS ||--o{ ORDER_ITEMS : "sold as"
+  SELLERS ||--o{ ORDER_ITEMS : fulfills
+  CATEGORY_TRANSLATION ||--o{ PRODUCTS : translates
+  GEOLOCATION }o--o{ CUSTOMERS : "zip prefix"
+  CUSTOMERS {
+    string customer_id PK
+    string customer_unique_id
+    string customer_state
+  }
+  ORDERS {
+    string order_id PK
+    string customer_id FK
+    string order_status
+    timestamp order_purchase_timestamp
+    timestamp order_delivered_customer_date
+    timestamp order_estimated_delivery_date
+  }
+  ORDER_ITEMS {
+    string order_id FK
+    int order_item_id
+    string product_id FK
+    string seller_id FK
+    float price
+    float freight_value
+  }
+  ORDER_PAYMENTS {
+    string order_id FK
+    string payment_type
+    int payment_installments
+    float payment_value
+  }
+  ORDER_REVIEWS {
+    string review_id PK
+    string order_id FK
+    int review_score
+  }
+  PRODUCTS {
+    string product_id PK
+    string product_category_name
+    float product_weight_g
+  }
+  SELLERS {
+    string seller_id PK
+    string seller_state
+  }
+  CATEGORY_TRANSLATION {
+    string category_name PK
+    string category_name_english
+  }
+  GEOLOCATION {
+    string zip_code_prefix
+    float lat
+    float lng
+  }
+```
+
+Note: `customer_id` is generated per order, so `customer_unique_id` is the real customer key (see methodology below).
+
 ## Key methodology decisions
 
 - **Temporal split, not random.** Features are computed strictly *before* a cutoff date (max date − 180 days); the label is whether the customer purchased *after* it. A leakage assertion in the pipeline enforces this.
